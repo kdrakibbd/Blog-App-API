@@ -1,6 +1,5 @@
 package com.rakib.blog.controller;
 
-import com.rakib.blog.entities.User;
 import com.rakib.blog.payloads.ApiResponse;
 import com.rakib.blog.payloads.UserDto;
 import com.rakib.blog.services.UserService;
@@ -18,14 +17,14 @@ public class UserController {
     private UserService userService;
 
     // POST Create user
-    @PostMapping("/adduser")
+    @PostMapping("/add-user")
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto) {
         UserDto createUserDto = this.userService.createUser(userDto);
         return new ResponseEntity<>(createUserDto, HttpStatus.CREATED);
     }
 
     // update user
-    @PutMapping("/updateuser/{userId}")
+    @PutMapping("/update-user/{userId}")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto, @PathVariable Integer userId) {
         UserDto updatedUser = this.userService.updateUser(userDto, userId);
         return ResponseEntity.ok(updatedUser);
@@ -39,12 +38,12 @@ public class UserController {
     }
 
     // get all users
-    @GetMapping("/allusers")
+    @GetMapping("/all-users")
     public ResponseEntity<List<UserDto>> getAllUsers() {
         return ResponseEntity.ok(this.userService.getAllUsers());
     }
 
-    // get all users
+    // get single user
     @GetMapping("/user/{userId}")
     public ResponseEntity<UserDto> getAllUsers(@PathVariable Integer userId) {
         return ResponseEntity.ok(this.userService.getUserById(userId));
