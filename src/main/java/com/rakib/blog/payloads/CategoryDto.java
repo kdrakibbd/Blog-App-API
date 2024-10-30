@@ -1,6 +1,6 @@
 package com.rakib.blog.payloads;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,8 +12,11 @@ import lombok.Setter;
 public class CategoryDto {
     private Integer categoryId;
 
-    @NotEmpty
-    @Size(min = 7, max = 100, message = "title must be 4 to 100 character")
+    @NotBlank
+    @Size(min = 7, message = "Minimum size of category title 4")
     private String categoryTitle;
+
+    @NotBlank
+    @Size(min = 10, message = "Minimum size of category description is 10")
     private String categoryDescription;
 }
