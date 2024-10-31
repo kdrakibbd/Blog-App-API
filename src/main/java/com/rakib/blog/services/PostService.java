@@ -2,6 +2,7 @@ package com.rakib.blog.services;
 
 import com.rakib.blog.entities.Post;
 import com.rakib.blog.payloads.PostDto;
+import com.rakib.blog.payloads.PostResponse;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public interface PostService {
      void deletePost(Integer postId);
 
      // get all post
-     List<PostDto> getAllPost();
+     PostResponse getAllPost(Integer pageNumber, Integer pageSize, String sortBy, String sortDir);
 
      //get post by post id
      PostDto getPostById(Integer postId);
