@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
     }
 
     // dto class to User class data laod
-    public User dtoToUser (UserDto userDto) {
+    public User dtoToUser(UserDto userDto) {
         return this.modelMapper.map(userDto, User.class);
     }
 
