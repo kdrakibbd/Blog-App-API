@@ -12,41 +12,41 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/categories")
+@RequestMapping("/api")
 public class CategoryController {
     @Autowired
     CategoryService categoryService;
 
     //create
-    @PostMapping("/create-category")
+    @PostMapping("/categories")
     public ResponseEntity<CategoryDto> createCategory(@Valid @RequestBody CategoryDto categoryDto) {
         CategoryDto createdCategory = this.categoryService.createCategory(categoryDto);
         return new ResponseEntity<CategoryDto>(createdCategory,HttpStatus.CREATED);
     }
 
     // update
-    @PutMapping("/update-category/{categoryId}")
+    @PutMapping("/categories/{categoryId}")
     public ResponseEntity<CategoryDto> updateCategory(@Valid @RequestBody CategoryDto categoryDto, @PathVariable Integer categoryId) {
         CategoryDto updateCategory = this.categoryService.updateCategory(categoryDto,categoryId);
         return ResponseEntity.ok(updateCategory);
     }
     // delete
 
-    @DeleteMapping("/delete-category/{categoryId}")
+    @DeleteMapping("/categories/{categoryId}")
     public ResponseEntity<ApiResponse> updateCategory(@PathVariable Integer categoryId) {
         this.categoryService.deleteCategory(categoryId);
         return new ResponseEntity<ApiResponse>(new ApiResponse("Category deleted successfully", true), HttpStatus.OK);
     }
     // get
 
-    @GetMapping("/get-category/{categoryId}")
+    @GetMapping("/categories/{categoryId}")
     public ResponseEntity<CategoryDto> getCategory(@PathVariable Integer categoryId) {
         CategoryDto categoryDto = this.categoryService.getCategory(categoryId);
         return new ResponseEntity<CategoryDto>(categoryDto, HttpStatus.OK);
     }
     // get all
 
-    @GetMapping("/get-categories")
+    @GetMapping("/categories")
     public ResponseEntity<List<CategoryDto>> getCategories() {
         List<CategoryDto> categories = this.categoryService.getCategories();
         return new ResponseEntity<List<CategoryDto>>(categories, HttpStatus.OK);
