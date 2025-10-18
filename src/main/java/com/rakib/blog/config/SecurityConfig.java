@@ -25,8 +25,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     public static final String[] PUBLIC_URLS = {
-            "/api/auth/**",
+            "/api/v1/auth/**",
             "/public/**",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/swagger-ui.html"
     };
 
     @Autowired
