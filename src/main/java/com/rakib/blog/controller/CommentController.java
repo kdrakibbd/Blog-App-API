@@ -21,15 +21,15 @@ public class CommentController {
 
     @Operation( summary = "Create a new comment on a post", description = "Endpoint to create a new comment associated with a specific post and user")
     @PostMapping("/post/{postId}/user/{userId}/comments")
-    public ResponseEntity<CommentDto> createComment(@RequestBody CommentDto comment, @PathVariable Integer postId, @PathVariable Integer userId) {
-        CommentDto createComment = this.commentService.createComment(comment, postId, userId);
-        return new ResponseEntity<CommentDto>(createComment, HttpStatus.CREATED);
+    public ResponseEntity<ApiResponse> createComment(@RequestBody CommentDto comment, @PathVariable Integer postId, @PathVariable Integer userId) {
+        ApiResponse response = this.commentService.createComment(comment, postId, userId);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Delete a comment", description = "Endpoint to delete a comment by its ID")
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<ApiResponse> deleteComment(@PathVariable Integer commentId) {
-        this.commentService.deleteComment(commentId);
-        return new ResponseEntity<ApiResponse>(new ApiResponse("Comment deleted successfully",true),HttpStatus.OK);
+        ApiResponse response = this.commentService.deleteComment(commentId);
+        return new ResponseEntity<>(response,HttpStatus.OK);
     }
 }

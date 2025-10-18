@@ -4,7 +4,7 @@ import com.rakib.blog.entities.Category;
 import com.rakib.blog.entities.Post;
 import com.rakib.blog.entities.User;
 import com.rakib.blog.exceptions.ResourceNotFoundException;
-import com.rakib.blog.payloads.CategoryDto;
+import com.rakib.blog.payloads.ApiResponse;
 import com.rakib.blog.payloads.PostDto;
 import com.rakib.blog.payloads.PostResponse;
 import com.rakib.blog.repository.CategoryRepo;
@@ -38,9 +38,8 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private CategoryRepo categoryRepo;
 
-    // Create post
     @Override
-    public PostDto createPost(PostDto postDto, Integer userid, Integer categoryId) {
+    public ApiResponse createPost(PostDto postDto, Integer userid, Integer categoryId) {
 
         User user = this.userRepo.findById(userid).orElseThrow(()->new ResourceNotFoundException("user", "user id", userid));
         Category category = this.categoryRepo.findById(categoryId).orElseThrow(()->new ResourceNotFoundException("Category", "category id", categoryId));
@@ -52,31 +51,30 @@ public class PostServiceImpl implements PostService {
         post.setUser(user);
         post.setCategory(category);
 
-        Post newPost = this.postRepo.save(post);
+        this.postRepo.save(post);
 
-        return this.modelMapper.map(newPost, PostDto.class);
+        return new ApiResponse("Post created successfully", true);
     }
 
     @Override
-    public PostDto updatePost(PostDto postDto, Integer postId) {
+    public ApiResponse updatePost(PostDto postDto, Integer postId) {
         Post post = this.postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", "Id", postId));
         post.setTitle(postDto.getTitle());
         post.setContent(postDto.getContent());
         post.setImageName(postDto.getImageName());
 
-        Post updatedPost = postRepo.save(post);
+        this.postRepo.save(post);
 
-        return this.modelMapper.map(updatedPost, PostDto.class);
+        return new ApiResponse("Post updated successfully", true);
     }
 
-    // delete post
     @Override
-    public void deletePost(Integer postId) {
+    public ApiResponse deletePost(Integer postId) {
         Post post = this.postRepo.findById(postId).orElseThrow(()-> new ResourceNotFoundException("Post", "Id", postId));
         this.postRepo.delete(post);
+        return new ApiResponse("Post deleted successfully", true);
     }
 
-    // get all post
     @Override
     public PostResponse getAllPost(Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
 
@@ -105,14 +103,12 @@ public class PostServiceImpl implements PostService {
         return postResponse;
     }
 
-    // get post by id
     @Override
     public PostDto getPostById(Integer postId) {
         Post post = this.postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", "Id", postId));
         return this.modelMapper.map(post, PostDto.class);
     }
 
-    // get posts by category
     @Override
     public List<PostDto> getPostByCategory(Integer categoryId) {
 
@@ -125,7 +121,6 @@ public class PostServiceImpl implements PostService {
         return postDtos;
     }
 
-    // get posts by user
     @Override
     public List<PostDto> getPostsByUser(Integer userId) {
         User user = this.userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
@@ -137,7 +132,6 @@ public class PostServiceImpl implements PostService {
         return postDtos;
     }
 
-    // Search post
     @Override
     public List<PostDto> searchPost(String keyword) {
         List<Post> posts = this.postRepo.findByTitleContaining(keyword);

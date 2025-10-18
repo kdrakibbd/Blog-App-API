@@ -4,6 +4,7 @@ import com.rakib.blog.entities.Comment;
 import com.rakib.blog.entities.Post;
 import com.rakib.blog.entities.User;
 import com.rakib.blog.exceptions.ResourceNotFoundException;
+import com.rakib.blog.payloads.ApiResponse;
 import com.rakib.blog.payloads.CommentDto;
 import com.rakib.blog.repository.CommentRepo;
 import com.rakib.blog.repository.PostRepo;
@@ -29,19 +30,20 @@ public class CommentServiceImpl implements CommentService {
     private ModelMapper modelMapper;
 
     @Override
-    public CommentDto createComment(CommentDto commentDto, Integer postId, Integer userId) {
+    public ApiResponse createComment(CommentDto commentDto, Integer postId, Integer userId) {
         Post post = this.postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", "Id", postId));
         User user = this.userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
         Comment comment = this.modelMapper.map(commentDto, Comment.class);
         comment.setPost(post);
         comment.setUser(user);
-        Comment savedComment = commentRepo.save(comment);
-        return this.modelMapper.map(savedComment, CommentDto.class);
+        this.commentRepo.save(comment);
+        return new ApiResponse("Commented", true);
     }
 
     @Override
-    public void deleteComment(Integer commentId) {
+    public ApiResponse deleteComment(Integer commentId) {
         Comment comment = this.commentRepo.findById(commentId).orElseThrow(() -> new ResourceNotFoundException("Comment", "Id", commentId));
         this.commentRepo.delete(comment);
+        return new ApiResponse("Comment deleted successfully", true);
     }
 }

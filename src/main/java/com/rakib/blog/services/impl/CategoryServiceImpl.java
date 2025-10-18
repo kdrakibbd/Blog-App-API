@@ -2,6 +2,7 @@ package com.rakib.blog.services.impl;
 
 import com.rakib.blog.entities.Category;
 import com.rakib.blog.exceptions.ResourceNotFoundException;
+import com.rakib.blog.payloads.ApiResponse;
 import com.rakib.blog.payloads.CategoryDto;
 import com.rakib.blog.repository.CategoryRepo;
 import com.rakib.blog.services.CategoryService;
@@ -20,27 +21,27 @@ public class CategoryServiceImpl implements CategoryService {
     private ModelMapper modelMapper;
 
     @Override
-    public CategoryDto createCategory(CategoryDto categoryDto) {
+    public ApiResponse createCategory(CategoryDto categoryDto) {
         Category category = this.modelMapper.map(categoryDto, Category.class);
         this.categoryRepo.save(category);
-        return this.modelMapper.map(category, CategoryDto.class);
+        return new ApiResponse("Category created successfully", true);
     }
 
     @Override
-    public CategoryDto updateCategory(CategoryDto categoryDto, Integer categoryId) {
+    public ApiResponse updateCategory(CategoryDto categoryDto, Integer categoryId) {
         Category category = this.categoryRepo.findById(categoryId).orElseThrow(()-> new ResourceNotFoundException("Category", "Category id", categoryId));
 
         category.setCategoryTitle(categoryDto.getCategoryTitle());
         category.setCategoryDescription(categoryDto.getCategoryDescription());
-        Category updatedCategory = this.categoryRepo.save(category);
-
-        return this.modelMapper.map(updatedCategory, CategoryDto.class);
+        this.categoryRepo.save(category);
+        return new ApiResponse("Category updated successfully", true);
     }
 
     @Override
-    public void deleteCategory(Integer categoryId) {
+    public ApiResponse deleteCategory(Integer categoryId) {
         Category category = this.categoryRepo.findById(categoryId).orElseThrow(()-> new ResourceNotFoundException("Category", "Category id", categoryId));
         this.categoryRepo.delete(category);
+        return new ApiResponse("Category deleted successfully", true);
     }
 
     @Override

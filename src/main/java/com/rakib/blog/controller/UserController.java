@@ -20,25 +20,18 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Operation( summary = "Create a new user", description = "Endpoint to create a new user with the provided details")
-    @PostMapping("/users")
-    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto userDto) {
-        UserDto createUserDto = this.userService.createUser(userDto);
-        return new ResponseEntity<>(createUserDto, HttpStatus.CREATED);
-    }
-
     @Operation(summary = "Update an existing user", description = "Endpoint to update an existing user with the provided details")
     @PutMapping("/users/{userId}")
-    public ResponseEntity<UserDto> updateUser(@Valid @RequestBody UserDto userDto, @PathVariable Integer userId) {
-        UserDto updatedUser = this.userService.updateUser(userDto, userId);
-        return ResponseEntity.ok(updatedUser);
+    public ResponseEntity<ApiResponse> updateUser(@Valid @RequestBody UserDto userDto, @PathVariable Integer userId) {
+        ApiResponse response = this.userService.updateUser(userDto, userId);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Delete a user", description = "Endpoint to delete a user by their ID")
     @DeleteMapping("/users/{userId}")
     public ResponseEntity<ApiResponse> deleteUser(@PathVariable Integer userId) {
-        this.userService.deleteUser(userId);
-        return new ResponseEntity<>(new ApiResponse("User deleted Successfully", true), HttpStatus.OK);
+        ApiResponse response = this.userService.deleteUser(userId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "Get all users", description = "Endpoint to retrieve a list of all users")
