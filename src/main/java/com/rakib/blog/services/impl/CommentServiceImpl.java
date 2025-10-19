@@ -15,6 +15,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 public class CommentServiceImpl implements CommentService {
 
@@ -37,6 +39,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = this.modelMapper.map(commentDto, Comment.class);
         comment.setPost(post);
         comment.setUser(user);
+        comment.setCreatedAt(LocalDateTime.now());
         this.commentRepo.save(comment);
         return new ApiResponse("Commented", true);
     }
@@ -58,6 +61,7 @@ public class CommentServiceImpl implements CommentService {
             throw new UnauthorizedException("You are not authorized to update this comment");
         }
         comment.setContent(commentDto.getContent());
+        comment.setUpdatedAt(LocalDateTime.now());
         this.commentRepo.save(comment);
         return new ApiResponse("Comment updated successfully", true);
     }

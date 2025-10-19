@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,7 +22,9 @@ public class PostDto {
 
     private String imageName;
 
-    private Date addedDate;
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
     private CategoryDto category;
 

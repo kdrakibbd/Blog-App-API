@@ -20,7 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,7 +48,7 @@ public class PostServiceImpl implements PostService {
         Post post = this.modelMapper.map(postDto, Post.class);
         post.setTitle(postDto.getTitle());
         post.setImageName("default.png");
-        post.setAddDate(new Date());
+        post.setCreatedAt(LocalDateTime.now());
         post.setUser(user);
         post.setCategory(category);
 
@@ -67,6 +67,7 @@ public class PostServiceImpl implements PostService {
         }
 
         post.setCategory(category);
+        post.setUpdatedAt(LocalDateTime.now());
         post.setTitle(postDto.getTitle());
         post.setContent(postDto.getContent());
         post.setImageName(postDto.getImageName());
