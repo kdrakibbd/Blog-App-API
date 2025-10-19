@@ -57,6 +57,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(apiResponse, HttpStatus.FORBIDDEN);
     }
 
+    @ExceptionHandler(ImageFormatException.class)
+    public ResponseEntity<ApiResponse> handleImageFormatException(ImageFormatException ex) {
+        ApiResponse apiResponse = new ApiResponse(ex.getMessage(), false);
+        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ImageSizeExceededException.class)
+    public ResponseEntity<ApiResponse> handleImageSizeExceededException(ImageSizeExceededException ex) {
+        ApiResponse apiResponse = new ApiResponse(ex.getMessage(), false);
+        return new ResponseEntity<>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Object> handleException(RuntimeException ex) {
         Map<String, Object> body = new HashMap<>();

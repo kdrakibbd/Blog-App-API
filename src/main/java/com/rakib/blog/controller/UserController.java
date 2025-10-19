@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Tag(name = "02. User Controller", description = "APIs for managing users")
@@ -46,5 +48,19 @@ public class UserController {
     @GetMapping("/users/{userId}")
     public ResponseEntity<UserDto> getUser(@PathVariable Integer userId) {
         return ResponseEntity.ok(this.userService.getUserById(userId));
+    }
+
+    @Operation(summary = "Upload user image", description = "Upload user image.")
+    @PutMapping("/users/image")
+    public ResponseEntity<ApiResponse> uploadUserImage(@CurrentUser User user, @RequestParam("image") MultipartFile image) throws IOException {
+        ApiResponse response = this.userService.uploadUserImage(user.getId(), image);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @Operation(summary = "Delete user image", description = "Delete user image.")
+    @DeleteMapping("/users/image")
+    public ResponseEntity<ApiResponse> deleteUserImage(@CurrentUser User user) throws IOException {
+        ApiResponse response = this.userService.deleteUserImage(user.getId());
+        return ResponseEntity.ok(response);
     }
 }

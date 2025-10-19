@@ -27,6 +27,7 @@ public class User implements UserDetails {
     private String email;
     private String password;
     private String about;
+    private String imageUrl;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Post> posts = new ArrayList<>();
