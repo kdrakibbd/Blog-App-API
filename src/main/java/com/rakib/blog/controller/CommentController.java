@@ -1,8 +1,10 @@
 package com.rakib.blog.controller;
 
 
+import com.rakib.blog.entities.User;
 import com.rakib.blog.payloads.ApiResponse;
 import com.rakib.blog.payloads.CommentDto;
+import com.rakib.blog.security.CurrentUser;
 import com.rakib.blog.services.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,16 +22,19 @@ public class CommentController {
     private CommentService commentService;
 
     @Operation( summary = "Create a new comment on a post", description = "Endpoint to create a new comment associated with a specific post and user")
-    @PostMapping("/post/{postId}/user/{userId}/comments")
-    public ResponseEntity<ApiResponse> createComment(@RequestBody CommentDto comment, @PathVariable Integer postId, @PathVariable Integer userId) {
-        ApiResponse response = this.commentService.createComment(comment, postId, userId);
+    @PostMapping("/post/{postId}/comments")
+    public ResponseEntity<ApiResponse> createComment(
+            @RequestBody CommentDto comment,
+            @PathVariable Integer postId,
+            @CurrentUser User user) {
+        ApiResponse response = this.commentService.createComment(comment, postId, user.getId());
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Delete a comment", description = "Endpoint to delete a comment by its ID")
     @DeleteMapping("/comments/{commentId}")
-    public ResponseEntity<ApiResponse> deleteComment(@PathVariable Integer commentId) {
-        ApiResponse response = this.commentService.deleteComment(commentId);
+    public ResponseEntity<ApiResponse> deleteComment(@PathVariable Integer commentId, @CurrentUser User user) {
+        ApiResponse response = this.commentService.deleteComment(commentId, user.getId());
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
 }

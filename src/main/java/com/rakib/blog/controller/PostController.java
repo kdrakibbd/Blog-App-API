@@ -1,9 +1,11 @@
 package com.rakib.blog.controller;
 
 import com.rakib.blog.config.AppConstants;
+import com.rakib.blog.entities.User;
 import com.rakib.blog.payloads.ApiResponse;
 import com.rakib.blog.payloads.PostDto;
 import com.rakib.blog.payloads.PostResponse;
+import com.rakib.blog.security.CurrentUser;
 import com.rakib.blog.services.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,30 +25,34 @@ public class PostController {
     private PostService postService;
 
     @Operation(summary = "Create a new post", description = "Endpoint to create a new blog post associated with a user and category")
-    @PostMapping("/user/{userId}/category/{categoryId}/posts")
-    public ResponseEntity<ApiResponse> createPost(@RequestBody PostDto postDto, @PathVariable Integer userId, @PathVariable Integer categoryId) {
-        ApiResponse response = this.postService.createPost(postDto, userId, categoryId);
+    @PostMapping("/category/{categoryId}/posts")
+    public ResponseEntity<ApiResponse> createPost(@RequestBody PostDto postDto, @CurrentUser User user, @PathVariable Integer categoryId) {
+        ApiResponse response = this.postService.createPost(postDto, user.getId(), categoryId);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Update a post", description = "Endpoint to update an existing blog post by its ID")
-    @PutMapping("/posts/{postId}")
-    public ResponseEntity<ApiResponse> updatePost(@RequestBody PostDto postDto,@PathVariable Integer postId) {
-        ApiResponse response = postService.updatePost(postDto, postId);
+    @PutMapping("/category/{categoryId}/posts/{postId}")
+    public ResponseEntity<ApiResponse> updatePost(
+            @RequestBody PostDto postDto,
+            @PathVariable Integer categoryId,
+            @PathVariable Integer postId,
+            @CurrentUser User user) {
+        ApiResponse response = postService.updatePost(postDto, categoryId, postId, user.getId());
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
     @Operation(summary = "Delete a post", description = "Endpoint to delete a specific blog post by its ID")
     @DeleteMapping("/posts/{postId}")
-    public ResponseEntity<ApiResponse> deletePost(@PathVariable Integer postId) {
-        ApiResponse response = this.postService.deletePost(postId);
+    public ResponseEntity<ApiResponse> deletePost(@PathVariable Integer postId, @CurrentUser User user) {
+        ApiResponse response = this.postService.deletePost(postId, user.getId());
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
     @Operation(summary = "Get all posts by category", description = "Endpoint to retrieve all blog posts associated with a specific category")
     @GetMapping("/category/{categoryId}/posts")
     public ResponseEntity<List<PostDto>> getPostsByCategory(@PathVariable Integer categoryId) {
-        List<PostDto> posts = this.postService.getPostsByUser(categoryId);
+        List<PostDto> posts = this.postService.getPostByCategory(categoryId);
         return new ResponseEntity<>(posts,HttpStatus.OK);
     }
 

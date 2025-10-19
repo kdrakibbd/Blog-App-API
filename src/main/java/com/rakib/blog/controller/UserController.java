@@ -1,7 +1,9 @@
 package com.rakib.blog.controller;
 
+import com.rakib.blog.entities.User;
 import com.rakib.blog.payloads.ApiResponse;
 import com.rakib.blog.payloads.UserDto;
+import com.rakib.blog.security.CurrentUser;
 import com.rakib.blog.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,9 +23,9 @@ public class UserController {
     private UserService userService;
 
     @Operation(summary = "Update an existing user", description = "Endpoint to update an existing user with the provided details")
-    @PutMapping("/users/{userId}")
-    public ResponseEntity<ApiResponse> updateUser(@Valid @RequestBody UserDto userDto, @PathVariable Integer userId) {
-        ApiResponse response = this.userService.updateUser(userDto, userId);
+    @PutMapping("/users")
+    public ResponseEntity<ApiResponse> updateUser(@Valid @RequestBody UserDto userDto, @CurrentUser User user) {
+        ApiResponse response = this.userService.updateUser(userDto, user.getId());
         return ResponseEntity.ok(response);
     }
 

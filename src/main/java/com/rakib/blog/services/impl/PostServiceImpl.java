@@ -4,6 +4,7 @@ import com.rakib.blog.entities.Category;
 import com.rakib.blog.entities.Post;
 import com.rakib.blog.entities.User;
 import com.rakib.blog.exceptions.ResourceNotFoundException;
+import com.rakib.blog.exceptions.UnauthorizedException;
 import com.rakib.blog.payloads.ApiResponse;
 import com.rakib.blog.payloads.PostDto;
 import com.rakib.blog.payloads.PostResponse;
@@ -57,8 +58,15 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ApiResponse updatePost(PostDto postDto, Integer postId) {
+    public ApiResponse updatePost(PostDto postDto, Integer categoryId, Integer postId, Integer userId) {
         Post post = this.postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", "Id", postId));
+        Category category = this.categoryRepo.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", "Id", categoryId));
+
+        if (!post.getUser().getId().equals(userId)) {
+            throw new UnauthorizedException("You are not authorized to update this post");
+        }
+
+        post.setCategory(category);
         post.setTitle(postDto.getTitle());
         post.setContent(postDto.getContent());
         post.setImageName(postDto.getImageName());
@@ -69,8 +77,11 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ApiResponse deletePost(Integer postId) {
+    public ApiResponse deletePost(Integer postId, Integer userId) {
         Post post = this.postRepo.findById(postId).orElseThrow(()-> new ResourceNotFoundException("Post", "Id", postId));
+        if (!post.getUser().getId().equals(userId)) {
+            throw new UnauthorizedException("You are not authorized to delete this post");
+        }
         this.postRepo.delete(post);
         return new ApiResponse("Post deleted successfully", true);
     }

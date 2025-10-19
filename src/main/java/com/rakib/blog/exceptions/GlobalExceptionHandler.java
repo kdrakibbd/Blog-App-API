@@ -51,6 +51,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(apiResponse, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ApiResponse> handleUnauthorizedException(UnauthorizedException ex) {
+        ApiResponse apiResponse = new ApiResponse(ex.getMessage(), false);
+        return new ResponseEntity<>(apiResponse, HttpStatus.FORBIDDEN);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Object> handleException(RuntimeException ex) {
         Map<String, Object> body = new HashMap<>();

@@ -41,8 +41,11 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public ApiResponse deleteComment(Integer commentId) {
+    public ApiResponse deleteComment(Integer commentId, Integer userId) {
         Comment comment = this.commentRepo.findById(commentId).orElseThrow(() -> new ResourceNotFoundException("Comment", "Id", commentId));
+        if (!comment.getUser().getId().equals(userId)) {
+            return new ApiResponse("You are not authorized to delete this comment", false);
+        }
         this.commentRepo.delete(comment);
         return new ApiResponse("Comment deleted successfully", true);
     }

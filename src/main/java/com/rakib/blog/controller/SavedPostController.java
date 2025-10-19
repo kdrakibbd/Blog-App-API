@@ -1,7 +1,9 @@
 package com.rakib.blog.controller;
 
+import com.rakib.blog.entities.User;
 import com.rakib.blog.payloads.ApiResponse;
 import com.rakib.blog.payloads.PostDto;
+import com.rakib.blog.security.CurrentUser;
 import com.rakib.blog.services.SavedPostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,16 +23,16 @@ public class SavedPostController {
     private SavedPostService savedPostService;
 
     @Operation(summary = "Save a post for a user", description = "Endpoint to save a specific post for a specific user")
-    @PostMapping("/user/{userId}/post/{postId}/save")
-    public ResponseEntity<ApiResponse> addPost(@PathVariable Integer userId, @PathVariable Integer postId) {
-        String message = this.savedPostService.addPost(userId, postId);
+    @PostMapping("/posts/{postId}/save")
+    public ResponseEntity<ApiResponse> addPostToSave(@CurrentUser User user, @PathVariable Integer postId) {
+        String message = this.savedPostService.addPost(user.getId(), postId);
         return new ResponseEntity<>(new ApiResponse(message, true), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Get all saved posts by a user", description = "Endpoint to retrieve all posts saved by a specific user")
-    @GetMapping("/user/{userId}/save")
-    public ResponseEntity<List<PostDto>> getAllPostByUser(@PathVariable Integer userId) {
-        List<PostDto> savedPostByUser = this.savedPostService.getSavedPostByUser(userId);
+    @GetMapping("/posts/save")
+    public ResponseEntity<List<PostDto>> getAllPostByUser(@CurrentUser User user) {
+        List<PostDto> savedPostByUser = this.savedPostService.getSavedPostByUser(user.getId());
         return new ResponseEntity<>(savedPostByUser, HttpStatus.OK);
     }
 }

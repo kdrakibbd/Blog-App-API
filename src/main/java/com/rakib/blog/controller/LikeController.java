@@ -1,6 +1,8 @@
 package com.rakib.blog.controller;
 
+import com.rakib.blog.entities.User;
 import com.rakib.blog.payloads.ApiResponse;
+import com.rakib.blog.security.CurrentUser;
 import com.rakib.blog.services.LikeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,9 +23,9 @@ public class LikeController {
     private LikeService likeService;
 
     @Operation(summary = "Add a like to a post by a user", description = "Endpoint to add a like to a specific post by a specific user")
-    @PostMapping("/user/{userId}/post/{postId}/likes")
-    public ResponseEntity<ApiResponse> addLike(@PathVariable Integer userId, @PathVariable Integer postId) {
-        String message = this.likeService.addLike(userId, postId);
+    @PostMapping("/post/{postId}/likes")
+    public ResponseEntity<ApiResponse> addLike(@CurrentUser User user, @PathVariable Integer postId) {
+        String message = this.likeService.addLike(user.getId(), postId);
         return new ResponseEntity<>(new ApiResponse(message, true), HttpStatus.CREATED);
     }
 
