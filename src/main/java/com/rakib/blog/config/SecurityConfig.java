@@ -52,7 +52,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         req->req.requestMatchers(PUBLIC_URLS).permitAll()
                                 .requestMatchers(HttpMethod.GET,"/api/v1/users").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/api/v1/user/{userId}/save").hasAuthority("USER")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/user/{userId}/save", "/api/v1/posts/my").hasAuthority("USER")
                                 .requestMatchers(HttpMethod.GET).permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/users/{userId}", "/api/v1/categories/{categoryId}").hasAuthority("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE).hasAnyAuthority("ADMIN", "USER")

@@ -6,4 +6,5 @@ import com.rakib.blog.payloads.CommentDto;
 public interface CommentService {
     ApiResponse createComment(CommentDto commentDto, Integer postId, Integer userId);
     ApiResponse deleteComment(Integer commentId, Integer userId);
+    ApiResponse updateComment(CommentDto commentDto, Integer commentId, Integer userId);
 }

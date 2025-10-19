@@ -37,4 +37,14 @@ public class CommentController {
         ApiResponse response = this.commentService.deleteComment(commentId, user.getId());
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
+
+    @Operation(summary = "Update a comment", description = "Endpoint to update an existing comment by its ID")
+    @PutMapping("/comments/{commentId}")
+    public ResponseEntity<ApiResponse> updateComment(
+            @RequestBody CommentDto commentDto,
+            @PathVariable Integer commentId,
+            @CurrentUser User user) {
+        ApiResponse response = this.commentService.updateComment(commentDto, commentId, user.getId());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

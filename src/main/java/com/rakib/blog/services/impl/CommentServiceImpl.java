@@ -4,6 +4,7 @@ import com.rakib.blog.entities.Comment;
 import com.rakib.blog.entities.Post;
 import com.rakib.blog.entities.User;
 import com.rakib.blog.exceptions.ResourceNotFoundException;
+import com.rakib.blog.exceptions.UnauthorizedException;
 import com.rakib.blog.payloads.ApiResponse;
 import com.rakib.blog.payloads.CommentDto;
 import com.rakib.blog.repository.CommentRepo;
@@ -44,9 +45,20 @@ public class CommentServiceImpl implements CommentService {
     public ApiResponse deleteComment(Integer commentId, Integer userId) {
         Comment comment = this.commentRepo.findById(commentId).orElseThrow(() -> new ResourceNotFoundException("Comment", "Id", commentId));
         if (!comment.getUser().getId().equals(userId)) {
-            return new ApiResponse("You are not authorized to delete this comment", false);
+            throw new UnauthorizedException("You are not authorized to delete this comment");
         }
         this.commentRepo.delete(comment);
         return new ApiResponse("Comment deleted successfully", true);
+    }
+
+    @Override
+    public ApiResponse updateComment(CommentDto commentDto, Integer commentId, Integer userId) {
+        Comment comment = this.commentRepo.findById(commentId).orElseThrow(() -> new ResourceNotFoundException("Comment", "Id", commentId));
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new UnauthorizedException("You are not authorized to update this comment");
+        }
+        comment.setContent(commentDto.getContent());
+        this.commentRepo.save(comment);
+        return new ApiResponse("Comment updated successfully", true);
     }
 }

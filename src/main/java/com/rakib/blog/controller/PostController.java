@@ -49,20 +49,6 @@ public class PostController {
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
-    @Operation(summary = "Get all posts by category", description = "Endpoint to retrieve all blog posts associated with a specific category")
-    @GetMapping("/category/{categoryId}/posts")
-    public ResponseEntity<List<PostDto>> getPostsByCategory(@PathVariable Integer categoryId) {
-        List<PostDto> posts = this.postService.getPostByCategory(categoryId);
-        return new ResponseEntity<>(posts,HttpStatus.OK);
-    }
-
-    @Operation(summary = "Get all posts by user", description = "Endpoint to retrieve all blog posts created by a specific user")
-    @GetMapping("/user/{userId}/posts")
-    public ResponseEntity<List<PostDto>> getPostsByUser(@PathVariable Integer userId) {
-        List<PostDto> posts = this.postService.getPostsByUser(userId);
-        return new ResponseEntity<>(posts,HttpStatus.OK);
-    }
-
     @Operation(summary = "Get all posts with pagination and sorting", description = "Endpoint to retrieve all blog posts with support for pagination and sorting")
     @GetMapping("/posts")
     public ResponseEntity<PostResponse> getAllPosts(
@@ -82,11 +68,53 @@ public class PostController {
         return new ResponseEntity<>(post,HttpStatus.OK);
     }
 
-    @Operation(summary = "Search posts by title", description = "Endpoint to search for blog posts by keywords in the title")
-    @GetMapping("/posts/search/{keywords}")
-    public ResponseEntity<List<PostDto>> searchPostByTitle(@PathVariable("keywords") String keywords) {
-        List<PostDto> posts = this.postService.searchPost(keywords);
-        return new ResponseEntity<>(posts, HttpStatus.OK);
+    @Operation(summary = "Get all posts by category with pagination and sorting", description = "Endpoint to retrieve all blog posts associated with a specific category")
+    @GetMapping("/category/{categoryId}/posts")
+    public ResponseEntity<PostResponse> getPostsByCategory(
+            @PathVariable Integer categoryId,
+            @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
+            @RequestParam(value = "sortBy", defaultValue = "postId", required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "asc", required = false) String sortDir
+    ) {
+        PostResponse posts = this.postService.getPostByCategory(categoryId, pageNumber, pageSize, sortBy, sortDir);
+        return new ResponseEntity<>(posts,HttpStatus.OK);
     }
 
+    @Operation(summary = "Get all posts by user with pagination and sorting", description = "Endpoint to retrieve all blog posts created by a specific user")
+    @GetMapping("/user/{userId}/posts")
+    public ResponseEntity<PostResponse> getPostsByUser(
+            @PathVariable Integer userId,
+            @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
+            @RequestParam(value = "sortBy", defaultValue = "postId", required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "asc", required = false) String sortDir) {
+        PostResponse response = this.postService.getPostsByUser(userId, pageNumber, pageSize, sortBy, sortDir);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Search posts by title with pagination with sorting", description = "Endpoint to search for blog posts by keywords in the title")
+    @GetMapping("/posts/search/{keyword}")
+    public ResponseEntity<PostResponse> searchPosts(
+            @PathVariable String keyword,
+            @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
+            @RequestParam(value = "sortBy", defaultValue = "postId", required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "asc", required = false) String sortDir) {
+        PostResponse response = this.postService.searchPost(keyword, pageNumber, pageSize, sortBy, sortDir);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Get my posts with pagination and sorting", description = "Endpoint to retrieve all blog posts created by the currently authenticated user")
+    @GetMapping("/posts/my")
+    public ResponseEntity<PostResponse> getMyPosts(
+            @CurrentUser User user,
+            @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
+            @RequestParam(value = "sortBy", defaultValue = "postId", required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "asc", required = false) String sortDir
+    ) {
+        PostResponse response = this.postService.getMyPosts(user.getId(), pageNumber, pageSize, sortBy, sortDir);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }
