@@ -20,7 +20,7 @@ public class PostDto {
 
     private String content;
 
-    private String imageName;
+    private String imageUrl;
 
     private LocalDateTime createdAt;
 

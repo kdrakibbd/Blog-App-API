@@ -7,6 +7,8 @@ public class AppConstants {
     public static final String SORT_DIR = "asc";
 
     public static final long USER_MAX_IMAGE_SIZE = 2 * 1024 * 1024;
+    public static final long POST_MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
     public static final String USER_FOLDER = "users";
+    public static final String POST_FOLDER = "posts";
 }

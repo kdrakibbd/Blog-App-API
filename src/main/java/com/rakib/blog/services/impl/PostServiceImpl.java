@@ -1,8 +1,10 @@
 package com.rakib.blog.services.impl;
 
+import com.rakib.blog.config.AppConstants;
 import com.rakib.blog.entities.Category;
 import com.rakib.blog.entities.Post;
 import com.rakib.blog.entities.User;
+import com.rakib.blog.exceptions.ImageSizeExceededException;
 import com.rakib.blog.exceptions.ResourceNotFoundException;
 import com.rakib.blog.exceptions.UnauthorizedException;
 import com.rakib.blog.payloads.ApiResponse;
@@ -11,6 +13,7 @@ import com.rakib.blog.payloads.PostResponse;
 import com.rakib.blog.repository.CategoryRepo;
 import com.rakib.blog.repository.PostRepo;
 import com.rakib.blog.repository.UserRepo;
+import com.rakib.blog.services.ImageService;
 import com.rakib.blog.services.PostService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +22,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,18 +44,31 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private CategoryRepo categoryRepo;
 
+    @Autowired
+    private ImageService imageService;
+
     @Override
-    public ApiResponse createPost(PostDto postDto, Integer userid, Integer categoryId) {
+    public ApiResponse createPost(PostDto postDto, Integer userid, Integer categoryId, MultipartFile image) throws Exception {
 
-        User user = this.userRepo.findById(userid).orElseThrow(()->new ResourceNotFoundException("user", "user id", userid));
-        Category category = this.categoryRepo.findById(categoryId).orElseThrow(()->new ResourceNotFoundException("Category", "category id", categoryId));
+        User user = this.userRepo.findById(userid)
+                .orElseThrow(()->new ResourceNotFoundException("user", "user id", userid));
+        Category category = this.categoryRepo.findById(categoryId)
+                .orElseThrow(()->new ResourceNotFoundException("Category", "category id", categoryId));
 
-        Post post = this.modelMapper.map(postDto, Post.class);
+        Post post = new Post();
         post.setTitle(postDto.getTitle());
-        post.setImageName("default.png");
+        post.setContent(postDto.getContent());
         post.setCreatedAt(LocalDateTime.now());
         post.setUser(user);
         post.setCategory(category);
+
+        if (image != null && !image.isEmpty()) {
+            if (image.getSize() > AppConstants.POST_MAX_IMAGE_SIZE) {
+                throw new ImageSizeExceededException("Image size must not exceed " + (AppConstants.POST_MAX_IMAGE_SIZE / (1024 * 1024)) + " MB");
+            }
+            String imageUrl = this.imageService.uploadImage(image, AppConstants.POST_FOLDER);
+            post.setImageUrl(imageUrl);
+        }
 
         this.postRepo.save(post);
 
@@ -58,7 +76,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public ApiResponse updatePost(PostDto postDto, Integer categoryId, Integer postId, Integer userId) {
+    public ApiResponse updatePost(PostDto postDto, Integer categoryId, Integer postId, Integer userId, MultipartFile image) throws Exception {
         Post post = this.postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", "Id", postId));
         Category category = this.categoryRepo.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", "Id", categoryId));
 
@@ -66,11 +84,22 @@ public class PostServiceImpl implements PostService {
             throw new UnauthorizedException("You are not authorized to update this post");
         }
 
-        post.setCategory(category);
-        post.setUpdatedAt(LocalDateTime.now());
         post.setTitle(postDto.getTitle());
         post.setContent(postDto.getContent());
-        post.setImageName(postDto.getImageName());
+        post.setUpdatedAt(LocalDateTime.now());
+        post.setCategory(category);
+
+        if (image != null && !image.isEmpty()) {
+            if (image.getSize() > AppConstants.POST_MAX_IMAGE_SIZE) {
+                throw new ImageSizeExceededException("Image size must not exceed " + (AppConstants.POST_MAX_IMAGE_SIZE / (1024 * 1024)) + " MB");
+            }
+            if (post.getImageUrl() != null) {
+                this.imageService.deleteImage(post.getImageUrl(), AppConstants.POST_FOLDER);
+            }
+
+            String imageUrl = this.imageService.uploadImage(image, AppConstants.POST_FOLDER);
+            post.setImageUrl(imageUrl);
+        }
 
         this.postRepo.save(post);
 
@@ -80,11 +109,21 @@ public class PostServiceImpl implements PostService {
     @Override
     public ApiResponse deletePost(Integer postId, Integer userId) {
         Post post = this.postRepo.findById(postId).orElseThrow(()-> new ResourceNotFoundException("Post", "Id", postId));
-        if (!post.getUser().getId().equals(userId)) {
+        User user = this.userRepo.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User", "Id", userId));
+
+        if (post.getUser().getId().equals(userId) || user.getRole().equals("ADMIN")) {
+            if (post.getImageUrl() != null && !post.getImageUrl().isEmpty()) {
+                try {
+                    this.imageService.deleteImage(post.getImageUrl(), AppConstants.POST_FOLDER);
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to delete image: " + e.getMessage());
+                }
+            }
+            this.postRepo.delete(post);
+            return new ApiResponse("Post deleted successfully", true);
+        } else {
             throw new UnauthorizedException("You are not authorized to delete this post");
         }
-        this.postRepo.delete(post);
-        return new ApiResponse("Post deleted successfully", true);
     }
 
     @Override
