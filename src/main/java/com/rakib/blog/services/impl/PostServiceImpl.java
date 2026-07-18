@@ -8,8 +8,8 @@ import com.rakib.blog.exceptions.ImageSizeExceededException;
 import com.rakib.blog.exceptions.ResourceNotFoundException;
 import com.rakib.blog.exceptions.UnauthorizedException;
 import com.rakib.blog.mappers.PostMapper;
+import com.rakib.blog.payloads.PaginatedResponse;
 import com.rakib.blog.payloads.PostDto;
-import com.rakib.blog.payloads.PostResponse;
 import com.rakib.blog.repository.CategoryRepo;
 import com.rakib.blog.repository.PostRepo;
 import com.rakib.blog.repository.UserRepo;
@@ -125,7 +125,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponse getAllPost(Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
+    public PaginatedResponse<PostDto> getAllPost(Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
@@ -144,7 +144,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponse getPostByCategory(Integer categoryId, Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
+    public PaginatedResponse<PostDto> getPostByCategory(Integer categoryId, Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
         Category category = this.categoryRepo.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "Id", categoryId));
 
@@ -159,7 +159,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponse getPostsByUser(Integer userId, Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
+    public PaginatedResponse<PostDto> getPostsByUser(Integer userId, Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
         User user = this.userRepo.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
 
@@ -174,7 +174,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponse searchPost(String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
+    public PaginatedResponse<PostDto> searchPost(String keyword, Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
@@ -186,7 +186,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponse getMyPosts(Integer userId, Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
+    public PaginatedResponse<PostDto> getMyPosts(Integer userId, Integer pageNumber, Integer pageSize, String sortBy, String sortDir) {
         User user = this.userRepo.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
 
@@ -200,18 +200,18 @@ public class PostServiceImpl implements PostService {
         return buildPostResponse(pagePosts);
     }
 
-    private PostResponse buildPostResponse(Page<Post> pagePosts) {
+    private PaginatedResponse<PostDto> buildPostResponse(Page<Post> pagePosts) {
         List<PostDto> postDtos = pagePosts.getContent().stream()
                 .map(this.postMapper::toDto)
                 .collect(Collectors.toList());
 
-        PostResponse postResponse = new PostResponse();
-        postResponse.setContent(postDtos);
-        postResponse.setPageNumber(pagePosts.getNumber());
-        postResponse.setPageSize(pagePosts.getSize());
-        postResponse.setTotalElements(pagePosts.getTotalElements());
-        postResponse.setTotalPages(pagePosts.getTotalPages());
-        postResponse.setLastPage(pagePosts.isLast());
-        return postResponse;
+        return PaginatedResponse.of(
+                postDtos,
+                pagePosts.getNumber(),
+                pagePosts.getSize(),
+                pagePosts.getTotalElements(),
+                pagePosts.getTotalPages(),
+                pagePosts.isLast()
+        );
     }
 }
