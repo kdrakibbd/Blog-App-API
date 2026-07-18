@@ -24,15 +24,15 @@ public class SavedPostController {
 
     @Operation(summary = "Save a post for a user", description = "Endpoint to save a specific post for a specific user")
     @PostMapping("/posts/{postId}/save")
-    public ResponseEntity<ApiResponse> addPostToSave(@CurrentUser User user, @PathVariable Integer postId) {
+    public ResponseEntity<ApiResponse<String>> addPostToSave(@CurrentUser User user, @PathVariable Integer postId) {
         String message = this.savedPostService.addPost(user.getId(), postId);
-        return new ResponseEntity<>(new ApiResponse(message, true), HttpStatus.CREATED);
+        return new ResponseEntity<>(ApiResponse.success(message, null, HttpStatus.CREATED.value()), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Get all saved posts by a user", description = "Endpoint to retrieve all posts saved by a specific user")
     @GetMapping("/posts/save")
-    public ResponseEntity<List<PostDto>> getAllPostByUser(@CurrentUser User user) {
-        List<PostDto> savedPostByUser = this.savedPostService.getSavedPostByUser(user.getId());
-        return new ResponseEntity<>(savedPostByUser, HttpStatus.OK);
+    public ResponseEntity<ApiResponse<List<PostDto>>> getAllPostByUser(@CurrentUser User user) {
+        List<PostDto> savedPosts = this.savedPostService.getSavedPostByUser(user.getId());
+        return ResponseEntity.ok(ApiResponse.success("Saved posts retrieved successfully", savedPosts));
     }
 }

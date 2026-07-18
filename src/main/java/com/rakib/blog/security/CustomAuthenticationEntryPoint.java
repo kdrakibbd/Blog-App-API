@@ -1,6 +1,8 @@
 package com.rakib.blog.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.rakib.blog.payloads.ApiResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,20 +13,24 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public CustomAuthenticationEntryPoint() {
+        objectMapper.registerModule(new JavaTimeModule());
+    }
+
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        Map<String, Object> errorDetails = new HashMap<>();
-        errorDetails.put("message", "Login first");
+        ApiResponse<Void> apiResponse = ApiResponse.error("Authentication required. Please login to continue", HttpStatus.UNAUTHORIZED.value());
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        response.getWriter().write(objectMapper.writeValueAsString(errorDetails));
+        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+        response.getWriter().flush();
     }
 }

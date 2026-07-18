@@ -1,6 +1,5 @@
 package com.rakib.blog.controller;
 
-
 import com.rakib.blog.entities.User;
 import com.rakib.blog.payloads.ApiResponse;
 import com.rakib.blog.payloads.CommentDto;
@@ -21,30 +20,30 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
-    @Operation( summary = "Create a new comment on a post", description = "Endpoint to create a new comment associated with a specific post and user")
+    @Operation(summary = "Create a new comment on a post", description = "Endpoint to create a new comment associated with a specific post and user")
     @PostMapping("/post/{postId}/comments")
-    public ResponseEntity<ApiResponse> createComment(
+    public ResponseEntity<ApiResponse<CommentDto>> createComment(
             @RequestBody CommentDto comment,
             @PathVariable Integer postId,
             @CurrentUser User user) {
-        ApiResponse response = this.commentService.createComment(comment, postId, user.getId());
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        CommentDto created = this.commentService.createComment(comment, postId, user.getId());
+        return new ResponseEntity<>(ApiResponse.success("Comment created successfully", created, HttpStatus.CREATED.value()), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Delete a comment", description = "Endpoint to delete a comment by its ID")
     @DeleteMapping("/comments/{commentId}")
-    public ResponseEntity<ApiResponse> deleteComment(@PathVariable Integer commentId, @CurrentUser User user) {
-        ApiResponse response = this.commentService.deleteComment(commentId, user.getId());
-        return new ResponseEntity<>(response,HttpStatus.OK);
+    public ResponseEntity<ApiResponse<Void>> deleteComment(@PathVariable Integer commentId, @CurrentUser User user) {
+        this.commentService.deleteComment(commentId, user.getId());
+        return ResponseEntity.ok(ApiResponse.success("Comment deleted successfully"));
     }
 
     @Operation(summary = "Update a comment", description = "Endpoint to update an existing comment by its ID")
     @PutMapping("/comments/{commentId}")
-    public ResponseEntity<ApiResponse> updateComment(
+    public ResponseEntity<ApiResponse<CommentDto>> updateComment(
             @RequestBody CommentDto commentDto,
             @PathVariable Integer commentId,
             @CurrentUser User user) {
-        ApiResponse response = this.commentService.updateComment(commentDto, commentId, user.getId());
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        CommentDto updated = this.commentService.updateComment(commentDto, commentId, user.getId());
+        return ResponseEntity.ok(ApiResponse.success("Comment updated successfully", updated));
     }
 }

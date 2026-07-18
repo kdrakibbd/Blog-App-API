@@ -1,5 +1,6 @@
 package com.rakib.blog.controller;
 
+import com.rakib.blog.payloads.ApiResponse;
 import com.rakib.blog.payloads.AuthenticationResponse;
 import com.rakib.blog.payloads.LoginRequest;
 import com.rakib.blog.payloads.RegisterRequest;
@@ -24,21 +25,27 @@ public class AuthenticationController {
     @Autowired
     private AuthenticationService authService;
 
-    @Operation( summary = "Register a new user", description = "Endpoint to register a new user with the provided details")
+    @Operation(summary = "Register a new user", description = "Endpoint to register a new user with the provided details")
     @PostMapping("/register")
-    ResponseEntity<AuthenticationResponse> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
-        return ResponseEntity.ok(this.authService.register(registerRequest));
+    ResponseEntity<ApiResponse<AuthenticationResponse>> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
+        AuthenticationResponse authResponse = this.authService.register(registerRequest);
+        return ResponseEntity.ok(ApiResponse.success(authResponse.getMessage(), authResponse));
     }
 
-    @Operation( summary = "User login", description = "Endpoint for user login with email and password")
+    @Operation(summary = "User login", description = "Endpoint for user login with email and password")
     @PostMapping("/login")
-    ResponseEntity<AuthenticationResponse> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
-        return ResponseEntity.ok(this.authService.login(loginRequest));
+    ResponseEntity<ApiResponse<AuthenticationResponse>> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
+        AuthenticationResponse authResponse = this.authService.login(loginRequest);
+        return ResponseEntity.ok(ApiResponse.success(authResponse.getMessage(), authResponse));
     }
 
     @Operation(summary = "Refresh authentication token", description = "Endpoint to refresh the authentication token using the refresh token")
     @PostMapping("/refresh-token")
-    ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
-        return this.authService.refreshToken(request);
+    ResponseEntity<ApiResponse<AuthenticationResponse>> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        ResponseEntity<?> result = this.authService.refreshToken(request);
+        if (result.getStatusCode().is2xxSuccessful() && result.getBody() instanceof AuthenticationResponse authResponse) {
+            return ResponseEntity.ok(ApiResponse.success(authResponse.getMessage(), authResponse));
+        }
+        return ResponseEntity.status(result.getStatusCode()).build();
     }
 }

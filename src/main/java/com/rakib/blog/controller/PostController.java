@@ -26,101 +26,98 @@ public class PostController {
 
     @Operation(summary = "Create a new post", description = "Endpoint to create a new blog post associated with a user and category")
     @PostMapping(path = "/category/{categoryId}/posts", consumes = {"multipart/form-data"})
-    public ResponseEntity<ApiResponse> createPost(
+    public ResponseEntity<ApiResponse<PostDto>> createPost(
             @Valid @RequestPart("post") PostDto postDto,
             @CurrentUser User user,
             @PathVariable Integer categoryId,
             @RequestPart(name = "image", required = false) MultipartFile image
     ) throws Exception {
-        ApiResponse response = this.postService.createPost(postDto, user.getId(), categoryId, image);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        PostDto created = this.postService.createPost(postDto, user.getId(), categoryId, image);
+        return new ResponseEntity<>(ApiResponse.success("Post created successfully", created, HttpStatus.CREATED.value()), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Update a post", description = "Endpoint to update an existing blog post by its ID")
     @PutMapping(path = "/category/{categoryId}/posts/{postId}", consumes = {"multipart/form-data"})
-    public ResponseEntity<ApiResponse> updatePost(
+    public ResponseEntity<ApiResponse<PostDto>> updatePost(
             @Valid @RequestPart("post") PostDto postDto,
             @CurrentUser User user,
             @PathVariable Integer categoryId,
             @PathVariable Integer postId,
             @RequestPart(name = "image", required = false) MultipartFile image) throws Exception {
-        ApiResponse response = postService.updatePost(postDto, categoryId, postId, user.getId(), image);
-        return new ResponseEntity<>(response,HttpStatus.OK);
+        PostDto updated = postService.updatePost(postDto, categoryId, postId, user.getId(), image);
+        return ResponseEntity.ok(ApiResponse.success("Post updated successfully", updated));
     }
 
     @Operation(summary = "Delete a post", description = "Endpoint to delete a specific blog post by its ID")
     @DeleteMapping("/posts/{postId}")
-    public ResponseEntity<ApiResponse> deletePost(@PathVariable Integer postId, @CurrentUser User user) {
-        ApiResponse response = this.postService.deletePost(postId, user.getId());
-        return new ResponseEntity<>(response,HttpStatus.OK);
+    public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable Integer postId, @CurrentUser User user) {
+        this.postService.deletePost(postId, user.getId());
+        return ResponseEntity.ok(ApiResponse.success("Post deleted successfully"));
     }
 
     @Operation(summary = "Get all posts with pagination and sorting", description = "Endpoint to retrieve all blog posts with support for pagination and sorting")
     @GetMapping("/posts")
-    public ResponseEntity<PostResponse> getAllPosts(
+    public ResponseEntity<ApiResponse<PostResponse>> getAllPosts(
             @RequestParam(value = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER, required = false) Integer pageNumber,
             @RequestParam(value = "pageSize", defaultValue = AppConstants.PAGE_SIZE, required = false) Integer pageSize,
-            @RequestParam(value = "sortBy", defaultValue = AppConstants.SORT_BY, required = false ) String sortBy,
-            @RequestParam(value = "sortDir", defaultValue = AppConstants.SORT_DIR, required = false) String sortDir)
-    {
+            @RequestParam(value = "sortBy", defaultValue = AppConstants.SORT_BY, required = false) String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = AppConstants.SORT_DIR, required = false) String sortDir) {
         PostResponse postResponse = this.postService.getAllPost(pageNumber, pageSize, sortBy, sortDir);
-        return new ResponseEntity<>(postResponse,HttpStatus.OK);
+        return ResponseEntity.ok(ApiResponse.success("Posts retrieved successfully", postResponse));
     }
 
     @Operation(summary = "Get a post by ID", description = "Endpoint to retrieve a specific blog post by its ID")
     @GetMapping("/posts/{postId}")
-    public ResponseEntity<PostDto> getPostById(@PathVariable Integer postId) {
+    public ResponseEntity<ApiResponse<PostDto>> getPostById(@PathVariable Integer postId) {
         PostDto post = this.postService.getPostById(postId);
-        return new ResponseEntity<>(post,HttpStatus.OK);
+        return ResponseEntity.ok(ApiResponse.success("Post retrieved successfully", post));
     }
 
     @Operation(summary = "Get all posts by category with pagination and sorting", description = "Endpoint to retrieve all blog posts associated with a specific category")
     @GetMapping("/category/{categoryId}/posts")
-    public ResponseEntity<PostResponse> getPostsByCategory(
+    public ResponseEntity<ApiResponse<PostResponse>> getPostsByCategory(
             @PathVariable Integer categoryId,
             @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
             @RequestParam(value = "sortBy", defaultValue = "postId", required = false) String sortBy,
-            @RequestParam(value = "sortDir", defaultValue = "asc", required = false) String sortDir
-    ) {
+            @RequestParam(value = "sortDir", defaultValue = "asc", required = false) String sortDir) {
         PostResponse posts = this.postService.getPostByCategory(categoryId, pageNumber, pageSize, sortBy, sortDir);
-        return new ResponseEntity<>(posts,HttpStatus.OK);
+        return ResponseEntity.ok(ApiResponse.success("Posts retrieved successfully", posts));
     }
 
     @Operation(summary = "Get all posts by user with pagination and sorting", description = "Endpoint to retrieve all blog posts created by a specific user")
     @GetMapping("/user/{userId}/posts")
-    public ResponseEntity<PostResponse> getPostsByUser(
+    public ResponseEntity<ApiResponse<PostResponse>> getPostsByUser(
             @PathVariable Integer userId,
             @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
             @RequestParam(value = "sortBy", defaultValue = "postId", required = false) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = "asc", required = false) String sortDir) {
         PostResponse response = this.postService.getPostsByUser(userId, pageNumber, pageSize, sortBy, sortDir);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(ApiResponse.success("Posts retrieved successfully", response));
     }
 
     @Operation(summary = "Search posts by title with pagination with sorting", description = "Endpoint to search for blog posts by keywords in the title")
     @GetMapping("/posts/search/{keyword}")
-    public ResponseEntity<PostResponse> searchPosts(
+    public ResponseEntity<ApiResponse<PostResponse>> searchPosts(
             @PathVariable String keyword,
             @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
             @RequestParam(value = "sortBy", defaultValue = "postId", required = false) String sortBy,
             @RequestParam(value = "sortDir", defaultValue = "asc", required = false) String sortDir) {
         PostResponse response = this.postService.searchPost(keyword, pageNumber, pageSize, sortBy, sortDir);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(ApiResponse.success("Posts retrieved successfully", response));
     }
 
     @Operation(summary = "Get my posts with pagination and sorting", description = "Endpoint to retrieve all blog posts created by the currently authenticated user")
     @GetMapping("/posts/my")
-    public ResponseEntity<PostResponse> getMyPosts(
+    public ResponseEntity<ApiResponse<PostResponse>> getMyPosts(
             @CurrentUser User user,
             @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
             @RequestParam(value = "sortBy", defaultValue = "postId", required = false) String sortBy,
-            @RequestParam(value = "sortDir", defaultValue = "asc", required = false) String sortDir
-    ) {
+            @RequestParam(value = "sortDir", defaultValue = "asc", required = false) String sortDir) {
         PostResponse response = this.postService.getMyPosts(user.getId(), pageNumber, pageSize, sortBy, sortDir);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(ApiResponse.success("Posts retrieved successfully", response));
     }
 }
