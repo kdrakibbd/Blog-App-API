@@ -2,11 +2,13 @@ package com.rakib.blog.controller;
 
 import com.rakib.blog.entities.User;
 import com.rakib.blog.payloads.ApiResponse;
-import com.rakib.blog.payloads.CommentDto;
+import com.rakib.blog.payloads.CommentRequest;
+import com.rakib.blog.payloads.CommentResponse;
 import com.rakib.blog.security.CurrentUser;
 import com.rakib.blog.services.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,11 +24,11 @@ public class CommentController {
 
     @Operation(summary = "Create a new comment on a post", description = "Endpoint to create a new comment associated with a specific post and user")
     @PostMapping("/post/{postId}/comments")
-    public ResponseEntity<ApiResponse<CommentDto>> createComment(
-            @RequestBody CommentDto comment,
+    public ResponseEntity<ApiResponse<CommentResponse>> createComment(
+            @Valid @RequestBody CommentRequest request,
             @PathVariable Integer postId,
             @CurrentUser User user) {
-        CommentDto created = this.commentService.createComment(comment, postId, user.getId());
+        CommentResponse created = this.commentService.createComment(request, postId, user.getId());
         return new ResponseEntity<>(ApiResponse.success("Comment created successfully", created, HttpStatus.CREATED.value()), HttpStatus.CREATED);
     }
 
@@ -39,11 +41,11 @@ public class CommentController {
 
     @Operation(summary = "Update a comment", description = "Endpoint to update an existing comment by its ID")
     @PutMapping("/comments/{commentId}")
-    public ResponseEntity<ApiResponse<CommentDto>> updateComment(
-            @RequestBody CommentDto commentDto,
+    public ResponseEntity<ApiResponse<CommentResponse>> updateComment(
+            @Valid @RequestBody CommentRequest request,
             @PathVariable Integer commentId,
             @CurrentUser User user) {
-        CommentDto updated = this.commentService.updateComment(commentDto, commentId, user.getId());
+        CommentResponse updated = this.commentService.updateComment(request, commentId, user.getId());
         return ResponseEntity.ok(ApiResponse.success("Comment updated successfully", updated));
     }
 }

@@ -1,31 +1,31 @@
 package com.rakib.blog.mappers;
 
 import com.rakib.blog.entities.User;
-import com.rakib.blog.payloads.UserDto;
+import com.rakib.blog.payloads.UpdateUserRequest;
+import com.rakib.blog.payloads.UserResponse;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserMapper {
 
-    public UserDto toDto(User user) {
+    public UserResponse toResponse(User user) {
         if (user == null) return null;
-        UserDto dto = new UserDto();
-        dto.setId(user.getId());
-        dto.setName(user.getName());
-        dto.setEmail(user.getEmail());
-        dto.setAbout(user.getAbout());
-        dto.setImageUrl(user.getImageUrl());
-        return dto;
+        UserResponse response = new UserResponse();
+        response.setId(user.getId());
+        response.setName(user.getName());
+        response.setEmail(user.getEmail());
+        response.setAbout(user.getAbout());
+        response.setImageUrl(user.getImageUrl());
+        return response;
     }
 
-    public User toEntity(UserDto dto) {
-        if (dto == null) return null;
-        User user = new User();
-        user.setName(dto.getName());
-        user.setEmail(dto.getEmail());
-        user.setPassword(dto.getPassword());
-        user.setAbout(dto.getAbout());
-        user.setImageUrl(dto.getImageUrl());
-        return user;
+    public void applyToEntity(UpdateUserRequest request, User user) {
+        if (request == null || user == null) return;
+        if (request.getName() != null) user.setName(request.getName());
+        if (request.getEmail() != null) user.setEmail(request.getEmail());
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            user.setPassword(request.getPassword());
+        }
+        if (request.getAbout() != null) user.setAbout(request.getAbout());
     }
 }

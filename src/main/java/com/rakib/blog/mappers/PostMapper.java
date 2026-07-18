@@ -1,7 +1,8 @@
 package com.rakib.blog.mappers;
 
 import com.rakib.blog.entities.Post;
-import com.rakib.blog.payloads.PostDto;
+import com.rakib.blog.payloads.PostRequest;
+import com.rakib.blog.payloads.PostResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,33 +20,32 @@ public class PostMapper {
     @Autowired
     private CommentMapper commentMapper;
 
-    public PostDto toDto(Post post) {
+    public PostResponse toResponse(Post post) {
         if (post == null) return null;
-        PostDto dto = new PostDto();
-        dto.setPostId(post.getPostId());
-        dto.setTitle(post.getTitle());
-        dto.setContent(post.getContent());
-        dto.setImageUrl(post.getImageUrl());
-        dto.setCreatedAt(post.getCreatedAt());
-        dto.setUpdatedAt(post.getUpdatedAt());
-        dto.setCategory(categoryMapper.toDto(post.getCategory()));
-        dto.setUser(userMapper.toDto(post.getUser()));
+        PostResponse response = new PostResponse();
+        response.setPostId(post.getPostId());
+        response.setTitle(post.getTitle());
+        response.setContent(post.getContent());
+        response.setImageUrl(post.getImageUrl());
+        response.setCreatedAt(post.getCreatedAt());
+        response.setUpdatedAt(post.getUpdatedAt());
+        response.setCategory(categoryMapper.toResponse(post.getCategory()));
+        response.setUser(userMapper.toResponse(post.getUser()));
         if (post.getComments() != null) {
-            dto.setComments(
+            response.setComments(
                     post.getComments().stream()
-                            .map(commentMapper::toDto)
+                            .map(commentMapper::toResponse)
                             .collect(Collectors.toSet())
             );
         }
-        return dto;
+        return response;
     }
 
-    public Post toEntity(PostDto dto) {
-        if (dto == null) return null;
+    public Post toEntity(PostRequest request) {
+        if (request == null) return null;
         Post post = new Post();
-        post.setTitle(dto.getTitle());
-        post.setContent(dto.getContent());
-        post.setImageUrl(dto.getImageUrl());
+        post.setTitle(request.getTitle());
+        post.setContent(request.getContent());
         return post;
     }
 }

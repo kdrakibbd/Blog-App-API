@@ -6,7 +6,8 @@ import com.rakib.blog.entities.User;
 import com.rakib.blog.exceptions.ResourceNotFoundException;
 import com.rakib.blog.exceptions.UnauthorizedException;
 import com.rakib.blog.mappers.CommentMapper;
-import com.rakib.blog.payloads.CommentDto;
+import com.rakib.blog.payloads.CommentRequest;
+import com.rakib.blog.payloads.CommentResponse;
 import com.rakib.blog.repository.CommentRepo;
 import com.rakib.blog.repository.PostRepo;
 import com.rakib.blog.repository.UserRepo;
@@ -32,19 +33,19 @@ public class CommentServiceImpl implements CommentService {
     private CommentMapper commentMapper;
 
     @Override
-    public CommentDto createComment(CommentDto commentDto, Integer postId, Integer userId) {
+    public CommentResponse createComment(CommentRequest request, Integer postId, Integer userId) {
         Post post = this.postRepo.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "Id", postId));
         User user = this.userRepo.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId));
 
-        Comment comment = this.commentMapper.toEntity(commentDto);
+        Comment comment = this.commentMapper.toEntity(request);
         comment.setPost(post);
         comment.setUser(user);
         comment.setCreatedAt(LocalDateTime.now());
 
         Comment saved = this.commentRepo.save(comment);
-        return this.commentMapper.toDto(saved);
+        return this.commentMapper.toResponse(saved);
     }
 
     @Override
@@ -58,16 +59,16 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentDto updateComment(CommentDto commentDto, Integer commentId, Integer userId) {
+    public CommentResponse updateComment(CommentRequest request, Integer commentId, Integer userId) {
         Comment comment = this.commentRepo.findById(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment", "Id", commentId));
         if (!comment.getUser().getId().equals(userId)) {
             throw new UnauthorizedException("You are not authorized to update this comment");
         }
-        comment.setContent(commentDto.getContent());
+        comment.setContent(request.getContent());
         comment.setUpdatedAt(LocalDateTime.now());
 
         Comment updated = this.commentRepo.save(comment);
-        return this.commentMapper.toDto(updated);
+        return this.commentMapper.toResponse(updated);
     }
 }

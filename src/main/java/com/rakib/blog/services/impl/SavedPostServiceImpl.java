@@ -5,7 +5,7 @@ import com.rakib.blog.entities.SavedPost;
 import com.rakib.blog.entities.User;
 import com.rakib.blog.exceptions.ResourceNotFoundException;
 import com.rakib.blog.mappers.PostMapper;
-import com.rakib.blog.payloads.PostDto;
+import com.rakib.blog.payloads.PostResponse;
 import com.rakib.blog.repository.PostRepo;
 import com.rakib.blog.repository.SavedPostRepo;
 import com.rakib.blog.repository.UserRepo;
@@ -50,19 +50,16 @@ public class SavedPostServiceImpl implements SavedPostService {
         s.setUser(user);
         s.setPost(post);
         this.savedPostRepo.save(s);
-
         return "Saved Post";
     }
 
     @Override
-    public List<PostDto> getSavedPostByUser(Integer userId) {
+    public List<PostResponse> getSavedPostByUser(Integer userId) {
         User user = this.userRepo.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "ID", userId));
 
-        List<SavedPost> allByUser = this.savedPostRepo.findAllByUser(user);
-
-        return allByUser.stream()
-                .map(savedPost -> this.postMapper.toDto(savedPost.getPost()))
+        return this.savedPostRepo.findAllByUser(user).stream()
+                .map(savedPost -> this.postMapper.toResponse(savedPost.getPost()))
                 .collect(Collectors.toList());
     }
 }

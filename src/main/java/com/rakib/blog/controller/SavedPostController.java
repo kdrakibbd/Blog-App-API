@@ -2,7 +2,7 @@ package com.rakib.blog.controller;
 
 import com.rakib.blog.entities.User;
 import com.rakib.blog.payloads.ApiResponse;
-import com.rakib.blog.payloads.PostDto;
+import com.rakib.blog.payloads.PostResponse;
 import com.rakib.blog.security.CurrentUser;
 import com.rakib.blog.services.SavedPostService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,8 +31,8 @@ public class SavedPostController {
 
     @Operation(summary = "Get all saved posts by a user", description = "Endpoint to retrieve all posts saved by a specific user")
     @GetMapping("/posts/save")
-    public ResponseEntity<ApiResponse<List<PostDto>>> getAllPostByUser(@CurrentUser User user) {
-        List<PostDto> savedPosts = this.savedPostService.getSavedPostByUser(user.getId());
+    public ResponseEntity<ApiResponse<List<PostResponse>>> getAllPostByUser(@CurrentUser User user) {
+        List<PostResponse> savedPosts = this.savedPostService.getSavedPostByUser(user.getId());
         return ResponseEntity.ok(ApiResponse.success("Saved posts retrieved successfully", savedPosts));
     }
 }

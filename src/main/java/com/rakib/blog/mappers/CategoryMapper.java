@@ -1,26 +1,27 @@
 package com.rakib.blog.mappers;
 
 import com.rakib.blog.entities.Category;
-import com.rakib.blog.payloads.CategoryDto;
+import com.rakib.blog.payloads.CategoryRequest;
+import com.rakib.blog.payloads.CategoryResponse;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CategoryMapper {
 
-    public CategoryDto toDto(Category category) {
+    public CategoryResponse toResponse(Category category) {
         if (category == null) return null;
-        CategoryDto dto = new CategoryDto();
-        dto.setCategoryId(category.getCategoryId());
-        dto.setCategoryTitle(category.getCategoryTitle());
-        dto.setCategoryDescription(category.getCategoryDescription());
-        return dto;
+        CategoryResponse response = new CategoryResponse();
+        response.setCategoryId(category.getCategoryId());
+        response.setCategoryTitle(category.getCategoryTitle());
+        response.setCategoryDescription(category.getCategoryDescription());
+        return response;
     }
 
-    public Category toEntity(CategoryDto dto) {
-        if (dto == null) return null;
+    public Category toEntity(CategoryRequest request) {
+        if (request == null) return null;
         Category category = new Category();
-        category.setCategoryTitle(dto.getCategoryTitle());
-        category.setCategoryDescription(dto.getCategoryDescription());
+        category.setCategoryTitle(request.getCategoryTitle());
+        category.setCategoryDescription(request.getCategoryDescription());
         return category;
     }
 }
