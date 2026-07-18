@@ -7,6 +7,7 @@ import com.rakib.blog.services.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,7 @@ public class AuthenticationController {
 
     @Operation(summary = "Refresh authentication token", description = "Endpoint to refresh the authentication token using the refresh token")
     @PostMapping("/refresh-token")
-    ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletRequest response) {
-        return this.authService.refreshToken(request, response);
+    ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        return this.authService.refreshToken(request);
     }
 }

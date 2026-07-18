@@ -5,11 +5,11 @@ import com.rakib.blog.repository.TokenRepo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
-@Configuration
+@Component
 public class CustomLogoutHandler implements LogoutHandler {
 
     @Autowired

@@ -6,13 +6,16 @@ import com.rakib.blog.entities.User;
 import com.rakib.blog.payloads.AuthenticationResponse;
 import com.rakib.blog.payloads.LoginRequest;
 import com.rakib.blog.payloads.RegisterRequest;
-import com.rakib.blog.payloads.UserDto;
+import com.rakib.blog.exceptions.ResourceNotFoundException;
 import com.rakib.blog.repository.TokenRepo;
 import com.rakib.blog.repository.UserRepo;
 import com.rakib.blog.security.JwtService;
 import com.rakib.blog.security.UserDetailsServiceImp;
 import com.rakib.blog.services.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
+import io.jsonwebtoken.JwtException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -30,6 +33,8 @@ import java.util.List;
 
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 
     @Autowired
     private UserRepo userRepo;
@@ -120,7 +125,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletRequest response) {
+    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
 
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
@@ -130,20 +135,27 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         String token = authHeader.substring(7);
 
-        String email = jwtService.extractUsername(token);
+        try {
+            String email = jwtService.extractUsername(token);
 
-        User user = this.userRepo.findByEmail(email).orElseThrow(()->new RuntimeException("No user found"));
+            User user = this.userRepo.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
-        if(this.jwtService.isValidRefreshToken(token, user)) {
-            String accessToken = jwtService.generateAccessToken(user);
-            String refreshToken = jwtService.generateRefreshToken(user);
+            if(this.jwtService.isValidRefreshToken(token, user)) {
+                String accessToken = jwtService.generateAccessToken(user);
+                String refreshToken = jwtService.generateRefreshToken(user);
 
-            revokeAllTokenByUser(user);
-            saveUserToken(accessToken, refreshToken, user);
+                revokeAllTokenByUser(user);
+                saveUserToken(accessToken, refreshToken, user);
 
-            return new ResponseEntity<>(new AuthenticationResponse(accessToken, refreshToken, "New token generated"), HttpStatus.OK);
+                return new ResponseEntity<>(new AuthenticationResponse(accessToken, refreshToken, "New token generated"), HttpStatus.OK);
+            }
+
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+
+        } catch (JwtException e) {
+            log.warn("Invalid refresh token: {}", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 }

@@ -2,6 +2,7 @@ package com.rakib.blog.repository;
 
 import com.rakib.blog.entities.Token;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -17,4 +18,8 @@ public interface TokenRepo extends JpaRepository<Token, Integer> {
     Optional<Token> findByAccessToken(String token);
 
     Optional<Token > findByRefreshToken(String token);
+
+    @Modifying
+    @Query("delete from Token t where t.loggedOut = true")
+    void deleteAllLoggedOutTokens();
 }
